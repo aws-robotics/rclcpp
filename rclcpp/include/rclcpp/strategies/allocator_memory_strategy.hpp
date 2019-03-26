@@ -164,6 +164,14 @@ public:
         if (!group || !group->can_be_taken_from().load()) {
           continue;
         }
+        for (auto & weak_publisher : group->get_publisher_ptrs()) {
+          auto publisher = weak_publisher.lock();
+          if (publisher) {
+            for (auto & publisher_event : publisher->get_event_handles()) {
+              waitable_handles_.push_back(publisher_event);
+            }
+          }
+        }
         for (auto & weak_subscription : group->get_subscription_ptrs()) {
           auto subscription = weak_subscription.lock();
           if (subscription) {
@@ -171,6 +179,9 @@ public:
             if (subscription->get_intra_process_subscription_handle()) {
               subscription_handles_.push_back(
                 subscription->get_intra_process_subscription_handle());
+            }
+            for (auto & subscription_event : subscription->get_event_handles()) {
+              waitable_handles_.push_back(subscription_event);
             }
           }
         }
@@ -438,7 +449,6 @@ public:
     }
     return number_of_events;
   }
-
 
   size_t number_of_ready_clients() const
   {

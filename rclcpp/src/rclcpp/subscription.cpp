@@ -121,6 +121,12 @@ SubscriptionBase::get_intra_process_subscription_handle() const
   return intra_process_subscription_handle_;
 }
 
+const std::vector<std::shared_ptr<rclcpp::QOSEventBase>> &
+SubscriptionBase::get_event_handles() const
+{
+  return event_handles_;
+}
+
 const rosidl_message_type_support_t &
 SubscriptionBase::get_message_type_support_handle() const
 {
