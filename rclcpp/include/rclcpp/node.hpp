@@ -549,6 +549,18 @@ public:
   const NodeOptions &
   get_node_options() const;
 
+
+  /// Manually assert that this Node is alive (for RMW_QOS_POLICY_MANUAL_BY_NODE)
+  /**
+   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_MANUAL_BY_NODE, the creator of this
+   * node must manually call `assert_liveliness` on a regular basis to signal to the rest of the
+   * system that this Node is still alive.
+   * This function must be called at least as often as the qos_profile's liveliness_lease_duration
+   */
+  RCLCPP_PUBLIC
+  void
+  assert_liveliness() {}
+
 protected:
   /// Construct a sub-node, which will extend the namespace of all entities created with it.
   /**
