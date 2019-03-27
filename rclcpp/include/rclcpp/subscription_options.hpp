@@ -28,9 +28,8 @@ namespace rclcpp
 
 struct SubscriptionEventCallbacks
 {
-  QOSDeadlineEventCallbackType deadline_callback_;
-  QOSLivelinessEventCallbackType liveliness_callback_;
-  QOSLifespanEventCallbackType lifespan_callback_;
+  QOSDeadlineRequestedCallbackType deadline_callback_;
+  QOSLivelinessChangedCallbackType liveliness_callback_;
 };
 
 template<typename Alloc = std::allocator<void>>
@@ -43,7 +42,6 @@ public:
    *
    *   - deadline_callback = nullptr
    *   - liveliness_callback = nullptr
-   *   - lifespan_callback = nullptr
    *   - subscription_qos_profile = rmw_qos_profile_default
    *   - ignore_local_publications = false
    *   - allocator = nullptr
@@ -116,7 +114,7 @@ public:
 
 
   RCLCPP_PUBLIC
-  const QOSDeadlineEventCallbackType &
+  const QOSDeadlineRequestedCallbackType &
   deadline_callback() const
   {
     return callbacks_.deadline_callback_;
@@ -124,14 +122,14 @@ public:
 
   RCLCPP_PUBLIC
   SubscriptionOptions &
-  deadline_callback(const QOSDeadlineEventCallbackType & callback)
+  deadline_callback(const QOSDeadlineRequestedCallbackType & callback)
   {
     callbacks_.deadline_callback_ = callback;
     return *this;
   }
 
   RCLCPP_PUBLIC
-  const QOSLivelinessEventCallbackType &
+  const QOSLivelinessChangedCallbackType &
   liveliness_callback() const
   {
     return callbacks_.liveliness_callback_;
@@ -139,24 +137,9 @@ public:
 
   RCLCPP_PUBLIC
   SubscriptionOptions &
-  liveliness_callback(const QOSLivelinessEventCallbackType & callback)
+  liveliness_callback(const QOSLivelinessChangedCallbackType & callback)
   {
     callbacks_.liveliness_callback_ = callback;
-    return *this;
-  }
-
-  RCLCPP_PUBLIC
-  const QOSLifespanEventCallbackType &
-  lifespan_callback() const
-  {
-    return callbacks_.lifespan_callback_;
-  }
-
-  RCLCPP_PUBLIC
-  SubscriptionOptions &
-  lifespan_callback(const QOSLifespanEventCallbackType & callback)
-  {
-    callbacks_.lifespan_callback_ = callback;
     return *this;
   }
 

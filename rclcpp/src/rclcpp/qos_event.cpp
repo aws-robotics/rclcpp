@@ -20,14 +20,14 @@ namespace rclcpp
 
 /// Get the number of ready events
 size_t
-QOSEventBase::get_number_of_ready_events()
+QOSEventHandlerBase::get_number_of_ready_events()
 {
   return 1;
 }
 
 /// Add the Waitable to a wait set.
 bool
-QOSEventBase::add_to_wait_set(rcl_wait_set_t * wait_set)
+QOSEventHandlerBase::add_to_wait_set(rcl_wait_set_t * wait_set)
 {
   if (rcl_wait_set_add_event(wait_set, &event_handle_, &wait_set_event_index_) != RCL_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
@@ -41,7 +41,7 @@ QOSEventBase::add_to_wait_set(rcl_wait_set_t * wait_set)
 
 /// Check if the Waitable is ready.
 bool
-QOSEventBase::is_ready(rcl_wait_set_t * wait_set)
+QOSEventHandlerBase::is_ready(rcl_wait_set_t * wait_set)
 {
   return wait_set->events[wait_set_event_index_] == &event_handle_;
 }

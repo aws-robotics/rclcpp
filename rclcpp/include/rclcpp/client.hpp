@@ -75,14 +75,6 @@ public:
   get_client_handle() const;
 
   RCLCPP_PUBLIC
-  std::shared_ptr<rcl_event_t>
-  get_event_handle();
-
-  RCLCPP_PUBLIC
-  std::shared_ptr<const rcl_event_t>
-  get_event_handle() const;
-
-  RCLCPP_PUBLIC
   bool
   service_is_ready() const;
 
@@ -121,13 +113,6 @@ protected:
   std::shared_ptr<rclcpp::Context> context_;
 
   std::shared_ptr<rcl_client_t> client_handle_;
-  std::shared_ptr<rcl_event_t> event_handle_;
-
-  size_t wait_set_client_index_;
-  size_t wait_set_event_index_;
-
-  bool client_ready_;
-  bool event_ready_;
 };
 
 template<typename ServiceT>
@@ -179,12 +164,6 @@ public:
           true);
       }
       rclcpp::exceptions::throw_from_rcl_error(ret, "could not create client");
-    }
-
-    ret = rcl_client_event_init(get_event_handle().get(), get_client_handle().get(),
-      &client_options, RCL_CLIENT_EVENT_UNIMPLEMENTED);
-    if (ret != RCL_RET_OK) {
-      rclcpp::exceptions::throw_from_rcl_error(ret, "could not create client event");
     }
   }
 

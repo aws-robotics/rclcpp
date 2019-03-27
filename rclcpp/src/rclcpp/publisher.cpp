@@ -155,10 +155,10 @@ PublisherBase::get_publisher_handle() const
   return &publisher_handle_;
 }
 
-const std::vector<std::shared_ptr<rclcpp::QOSEventBase>> &
-PublisherBase::get_event_handles() const
+const std::vector<std::shared_ptr<rclcpp::QOSEventHandlerBase>> &
+PublisherBase::get_event_handlers() const
 {
-  return event_handles_;
+  return event_handlers_;
 }
 
 size_t

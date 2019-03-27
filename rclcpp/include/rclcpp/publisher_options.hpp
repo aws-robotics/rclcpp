@@ -28,9 +28,8 @@ namespace rclcpp
 
 struct PublisherEventCallbacks
 {
-  QOSDeadlineEventCallbackType deadline_callback_;
-  QOSLivelinessEventCallbackType liveliness_callback_;
-  QOSLifespanEventCallbackType lifespan_callback_;
+  QOSDeadlineOfferedCallbackType deadline_callback_;
+  QOSLivelinessLostCallbackType liveliness_callback_;
 };
 
 template<typename Alloc = std::allocator<void>>
@@ -119,7 +118,7 @@ public:
 
 
   RCLCPP_PUBLIC
-  const QOSDeadlineEventCallbackType &
+  const QOSDeadlineOfferedCallbackType &
   deadline_callback() const
   {
     return callbacks_.deadline_callback_;
@@ -127,14 +126,14 @@ public:
 
   RCLCPP_PUBLIC
   PublisherOptions &
-  deadline_callback(const QOSDeadlineEventCallbackType & callback)
+  deadline_callback(const QOSDeadlineOfferedCallbackType & callback)
   {
     callbacks_.deadline_callback_ = callback;
     return *this;
   }
 
   RCLCPP_PUBLIC
-  const QOSLivelinessEventCallbackType &
+  const QOSLivelinessLostCallbackType &
   liveliness_callback() const
   {
     return callbacks_.liveliness_callback_;
@@ -142,24 +141,9 @@ public:
 
   RCLCPP_PUBLIC
   PublisherOptions &
-  liveliness_callback(const QOSLivelinessEventCallbackType & callback)
+  liveliness_callback(const QOSLivelinessLostCallbackType & callback)
   {
     callbacks_.liveliness_callback_ = callback;
-    return *this;
-  }
-
-  RCLCPP_PUBLIC
-  const QOSLifespanEventCallbackType &
-  lifespan_callback() const
-  {
-    return callbacks_.lifespan_callback_;
-  }
-
-  RCLCPP_PUBLIC
-  PublisherOptions &
-  lifespan_callback(const QOSLifespanEventCallbackType & callback)
-  {
-    callbacks_.lifespan_callback_ = callback;
     return *this;
   }
 

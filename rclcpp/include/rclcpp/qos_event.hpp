@@ -29,62 +29,18 @@
 namespace rclcpp
 {
 
-struct QOSDeadlineEventInfo
-{
-  enum DeadlineEventType
-  {
-    DEADLINE_MISSED
-  };
+using QOSDeadlineRequestedInfo = rmw_requested_deadline_missed_status_t;
+using QOSDeadlineOfferedInfo = rmw_offered_deadline_missed_t;
+using QOSLivelinessChangedInfo = rmw_liveliness_changed_status_t;
+using QOSLivelinessLostInfo = rmw_liveliness_lost_t;
 
-  DeadlineEventType event_type;
-  void * other_info;
-};
-
-struct QOSLivelinessEventInfo
-{
-  enum LivelinessEventType
-  {
-    LIVELINESS_CHANGED
-  };
-
-  LivelinessEventType event_type;
-  void * other_info;
-};
-
-struct QOSLifespanEventInfo
-{
-  enum LifespanEventType
-  {
-    LIFESPAN_EXPIRED
-  };
-
-  LifespanEventType event_type;
-  void * other_info;
-};
+using QOSDeadlineRequestedCallbackType = std::function<void(QOSDeadlineRequestedInfo&)>;
+using QOSDeadlineOfferedCallbackType = std::function<void(QOSDeadlineOfferedInfo&)>;
+using QOSLivelinessChangedCallbackType = std::function<void(QOSLivelinessChangedInfo&)>;
+using QOSLivelinessLostCallbackType = std::function<void(QOSLivelinessLostInfo&)>;
 
 
-using QOSDeadlineEventCallbackType = std::function<void (QOSDeadlineEventInfo &)>;
-using QOSLivelinessEventCallbackType = std::function<void (QOSLivelinessEventInfo &)>;
-using QOSLifespanEventCallbackType = std::function<void (QOSLifespanEventInfo &)>;
-
-
-// struct QOSDeadlineEventConfig {
-//   using CallbackT = QOSDeadlineEventCallbackType;
-//   using EventInfoT = QOSDeadlineEventInfo;
-// };
-
-// struct QOSLivelinessEventConfig {
-//   using CallbackT = QOSLivelinessEventCallbackType;
-//   using EventInfoT = QOSLivelinessEventInfo;
-// };
-
-// struct QOSLifespanEventConfig {
-//   using CallbackT = QOSLifespanEventCallbackType;
-//   using EventInfoT = QOSLifespanEventInfo;
-// };
-
-
-class QOSEventBase : public Waitable
+class QOSEventHandlerBase : public Waitable
 {
 public:
   /// Get the number of ready events
@@ -106,11 +62,11 @@ protected:
 
 
 template<typename EventCallbackT>
-class QOSEvent : public QOSEventBase
+class QOSEventHandler : public QOSEventHandlerBase
 {
 public:
   template<typename InitFuncT, typename HandleT, typename OptionsT, typename EventTypeEnum>
-  QOSEvent(
+  QOSEventHandler(
     const EventCallbackT & callback,
     InitFuncT init_func,
     HandleT handle,
@@ -125,7 +81,7 @@ public:
     }
   }
 
-  ~QOSEvent()
+  ~QOSEventHandler()
   {
     if (rcl_event_fini(&event_handle_) != RCL_RET_OK) {
       RCUTILS_LOG_ERROR_NAMED(
@@ -141,7 +97,7 @@ public:
   {
     EventCallbackInfoT callback_info;
 
-    rcl_ret_t ret = rcl_take_event(&event_handle_, callback_info.other_info);
+    rcl_ret_t ret = rcl_take_event(&event_handle_, &callback_info);
     if (ret != RCL_RET_OK) {
       RCUTILS_LOG_ERROR_NAMED(
         "rclcpp",

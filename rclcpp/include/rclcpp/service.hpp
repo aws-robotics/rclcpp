@@ -25,7 +25,6 @@
 #include "rcl/service.h"
 
 #include "rclcpp/any_service_callback.hpp"
-#include "rclcpp/event.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/type_support_decl.hpp"
@@ -62,14 +61,6 @@ public:
   std::shared_ptr<const rcl_service_t>
   get_service_handle() const;
 
-  RCLCPP_PUBLIC
-  std::shared_ptr<rcl_event_t>
-  get_event_handle();
-
-  RCLCPP_PUBLIC
-  std::shared_ptr<const rcl_event_t>
-  get_event_handle() const;
-
   virtual std::shared_ptr<void> create_request() = 0;
   virtual std::shared_ptr<rmw_request_id_t> create_request_header() = 0;
   virtual void handle_request(
@@ -90,13 +81,7 @@ protected:
   std::shared_ptr<rcl_node_t> node_handle_;
 
   std::shared_ptr<rcl_service_t> service_handle_;
-  std::shared_ptr<rcl_event_t> event_handle_;
-
-  size_t wait_set_service_index_;
-  size_t wait_set_event_index_;
-
-  bool service_ready_;
-  bool event_ready_;
+  bool owns_rcl_handle_ = true;
 };
 
 template<typename ServiceT>
@@ -168,25 +153,6 @@ public:
       }
 
       rclcpp::exceptions::throw_from_rcl_error(ret, "could not create service");
-    }
-
-    event_handle_ = std::shared_ptr<rcl_event_t>(new rcl_event_t,
-        [](rcl_event_t * event)
-        {
-          if (rcl_event_fini(event) != RCL_RET_OK) {
-            RCUTILS_LOG_ERROR_NAMED(
-              "rclcpp",
-              "Error in destruction of rcl event handle: %s", rcl_get_error_string().str);
-            rcl_reset_error();
-          }
-          delete event;
-        });
-    *event_handle_.get() = rcl_get_zero_initialized_event();
-
-    ret = rcl_service_event_init(get_event_handle().get(), get_service_handle().get(),
-      &service_options, RCL_SERVICE_EVENT_UNIMPLEMENTED);
-    if (ret != RCL_RET_OK) {
-      rclcpp::exceptions::throw_from_rcl_error(ret, "could not create service event");
     }
   }
 

@@ -52,18 +52,6 @@ ServiceBase::get_service_handle() const
   return service_handle_;
 }
 
-std::shared_ptr<rcl_event_t>
-ServiceBase::get_event_handle()
-{
-  return event_handle_;
-}
-
-std::shared_ptr<const rcl_event_t>
-ServiceBase::get_event_handle() const
-{
-  return event_handle_;
-}
-
 rcl_node_t *
 ServiceBase::get_rcl_node_handle()
 {

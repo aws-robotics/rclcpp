@@ -103,25 +103,9 @@ public:
   virtual const std::shared_ptr<rcl_subscription_t>
   get_intra_process_subscription_handle() const;
 
-  // RCLCPP_PUBLIC
-  template<typename EventCallbackT>
-  void
-  add_event_handle(
-    const EventCallbackT & callback,
-    const rcl_subscription_options_t & subscription_options,
-    const rcl_subscription_event_type_t event_type)
-  {
-    event_handles_.emplace_back(std::make_shared<QOSEvent<EventCallbackT>>(
-        callback,
-        rcl_subscription_event_init,
-        get_subscription_handle().get(),
-        &subscription_options,
-        event_type));
-  }
-
   RCLCPP_PUBLIC
-  const std::vector<std::shared_ptr<QOSEventBase>> &
-  get_event_handles() const;
+  const std::vector<std::shared_ptr<QOSEventHandlerBase>> &
+  get_event_handlers() const;
 
   /// Borrow a new message.
   /** \return Shared pointer to the fresh message. */
@@ -169,6 +153,21 @@ public:
   get_publisher_count() const;
 
 protected:
+  template<typename EventCallbackT>
+  void
+  add_event_handler(
+    const EventCallbackT & callback,
+    const rcl_subscription_options_t & subscription_options,
+    const rcl_subscription_event_type_t event_type)
+  {
+    event_handlers_.emplace_back(std::make_shared<QOSEventHandler<EventCallbackT>>(
+        callback,
+        rcl_subscription_event_init,
+        get_subscription_handle().get(),
+        &subscription_options,
+        event_type));
+  }
+
   using IntraProcessManagerWeakPtr =
     std::weak_ptr<rclcpp::intra_process_manager::IntraProcessManager>;
 
@@ -178,7 +177,7 @@ protected:
   size_t wait_set_subscription_index_;
   bool subscription_ready_;
 
-  std::vector<std::shared_ptr<QOSEventBase>> event_handles_;
+  std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
   bool use_intra_process_;
   std::shared_ptr<rcl_subscription_t> intra_process_subscription_handle_;
@@ -243,16 +242,13 @@ public:
     matches_any_intra_process_publishers_(nullptr)
   {
     if (event_callbacks.deadline_callback_) {
-      this->add_event_handle(event_callbacks.deadline_callback_,
+      this->add_event_handler(event_callbacks.deadline_callback_,
         subscription_options, RCL_SUBSCRIPTION_DEADLINE);
     }
     if (event_callbacks.liveliness_callback_) {
-      this->add_event_handle(event_callbacks.liveliness_callback_,
+      this->add_event_handler(event_callbacks.liveliness_callback_,
         subscription_options, RCL_SUBSCRIPTION_LIVELINESS);
     }
-    // if (event_callbacks.lifespan_callback_) {
-    //   this->add_event_handle(event_callbacks.lifespan_callback_);
-    // }
   }
 
   /// Support dynamically setting the message memory strategy.
