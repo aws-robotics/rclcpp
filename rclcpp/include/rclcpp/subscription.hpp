@@ -34,6 +34,7 @@
 #include "rclcpp/expand_topic_or_service_name.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/message_memory_strategy.hpp"
+#include "rclcpp/subscription_options.hpp"
 #include "rclcpp/subscription_traits.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -195,6 +196,7 @@ public:
     const std::string & topic_name,
     const rcl_subscription_options_t & subscription_options,
     AnySubscriptionCallback<CallbackMessageT, Alloc> callback,
+    const SubscriptionEventCallbacks & /* event_callbacks */,
     typename message_memory_strategy::MessageMemoryStrategy<CallbackMessageT, Alloc>::SharedPtr
     memory_strategy = message_memory_strategy::MessageMemoryStrategy<CallbackMessageT,
     Alloc>::create_default())

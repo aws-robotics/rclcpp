@@ -54,7 +54,8 @@ namespace rclcpp
 template<typename MessageT, typename Alloc, typename PublisherT>
 std::shared_ptr<PublisherT>
 Node::create_publisher(
-  const std::string & topic_name, size_t qos_history_depth,
+  const std::string & topic_name,
+  size_t qos_history_depth,
   std::shared_ptr<Alloc> allocator)
 {
   if (!allocator) {
@@ -80,7 +81,8 @@ extend_name_with_sub_namespace(const std::string & name, const std::string & sub
 template<typename MessageT, typename Alloc, typename PublisherT>
 std::shared_ptr<PublisherT>
 Node::create_publisher(
-  const std::string & topic_name, const rmw_qos_profile_t & qos_profile,
+  const std::string & topic_name,
+  const rmw_qos_profile_t & qos_profile,
   std::shared_ptr<Alloc> allocator)
 {
   if (!allocator) {
@@ -91,6 +93,30 @@ Node::create_publisher(
     this->node_topics_.get(),
     extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
     qos_profile,
+    PublisherEventCallbacks(),
+    nullptr,
+    this->get_node_options().use_intra_process_comms(),
+    allocator);
+}
+
+template<typename MessageT, typename Alloc, typename PublisherT>
+std::shared_ptr<PublisherT>
+Node::create_publisher(
+  const std::string & topic_name,
+  const PublisherOptions<Alloc> & options,
+  rclcpp::callback_group::CallbackGroup::SharedPtr group)
+{
+  std::shared_ptr<Alloc> allocator = options.allocator();
+  if (!allocator) {
+    allocator = std::make_shared<Alloc>();
+  }
+
+  return rclcpp::create_publisher<MessageT, Alloc, PublisherT>(
+    this->node_topics_.get(),
+    extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
+    options.qos_profile(),
+    options.event_callbacks(),
+    group,
     this->get_node_options().use_intra_process_comms(),
     allocator);
 }
@@ -128,8 +154,49 @@ Node::create_subscription(
     extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
     std::forward<CallbackT>(callback),
     qos_profile,
+    SubscriptionEventCallbacks(),
     group,
     ignore_local_publications,
+    this->get_node_options().use_intra_process_comms(),
+    msg_mem_strat,
+    allocator);
+}
+
+template<
+  typename MessageT,
+  typename CallbackT,
+  typename Alloc,
+  typename SubscriptionT>
+std::shared_ptr<SubscriptionT>
+Node::create_subscription(
+  const std::string & topic_name,
+  CallbackT && callback,
+  const SubscriptionOptions<Alloc> & options,
+  rclcpp::callback_group::CallbackGroup::SharedPtr group,
+  typename rclcpp::message_memory_strategy::MessageMemoryStrategy<
+    typename rclcpp::subscription_traits::has_message_type<CallbackT>::type, Alloc>::SharedPtr
+  msg_mem_strat)
+{
+  using CallbackMessageT = typename rclcpp::subscription_traits::has_message_type<CallbackT>::type;
+
+  std::shared_ptr<Alloc> allocator = options.allocator();
+  if (!allocator) {
+    allocator = std::make_shared<Alloc>();
+  }
+
+  if (!msg_mem_strat) {
+    using rclcpp::message_memory_strategy::MessageMemoryStrategy;
+    msg_mem_strat = MessageMemoryStrategy<CallbackMessageT, Alloc>::create_default();
+  }
+
+  return rclcpp::create_subscription<MessageT, CallbackT, Alloc, CallbackMessageT, SubscriptionT>(
+    this->node_topics_.get(),
+    extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
+    std::forward<CallbackT>(callback),
+    options.qos_profile(),
+    options.event_callbacks(),
+    group,
+    options.ignore_local_publications(),
     this->get_node_options().use_intra_process_comms(),
     msg_mem_strat,
     allocator);

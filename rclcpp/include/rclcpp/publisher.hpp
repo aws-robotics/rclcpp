@@ -31,17 +31,21 @@
 
 #include "rclcpp/allocator/allocator_common.hpp"
 #include "rclcpp/allocator/allocator_deleter.hpp"
+#include "rclcpp/exceptions.hpp"
 #include "rclcpp/macros.hpp"
-#include "rclcpp/node_interfaces/node_base_interface.hpp"
+#include "rclcpp/publisher_options.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
 
 namespace rclcpp
 {
 
-// Forward declaration is used for friend statement.
 namespace node_interfaces
 {
+// NOTE(emersonknapp) Forward declaration avoids including node_base_interface.hpp which causes
+// circular inclusion from callback_group.hpp
+class NodeBaseInterface;
+// Forward declaration is used for friend statement.
 class NodeTopicsInterface;
 }
 
@@ -128,6 +132,16 @@ public:
   size_t
   get_intra_process_subscription_count() const;
 
+  /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_MANUAL_BY_TOPIC)
+  /**
+   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_MANUAL_BY_TOPIC, the creator of this
+   * Publisher must manually call `assert_liveliness` periodically to signal that this Publisher
+   * is still alive. Must be called at least as often as qos_profile's Liveliness lease_duration
+   */
+  RCLCPP_PUBLIC
+  void
+  assert_liveliness() {}
+
   /// Compare this publisher to a gid.
   /**
    * Note that this function calls the next function.
@@ -194,6 +208,7 @@ public:
     rclcpp::node_interfaces::NodeBaseInterface * node_base,
     const std::string & topic,
     const rcl_publisher_options_t & publisher_options,
+    const PublisherEventCallbacks & /* event_callbacks */,
     const std::shared_ptr<MessageAlloc> & allocator)
   : PublisherBase(
       node_base,
