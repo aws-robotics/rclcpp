@@ -30,9 +30,9 @@ namespace rclcpp
 {
 
 using QOSDeadlineRequestedInfo = rmw_requested_deadline_missed_status_t;
-using QOSDeadlineOfferedInfo = rmw_offered_deadline_missed_t;
+using QOSDeadlineOfferedInfo = rmw_offered_deadline_missed_status_t;
 using QOSLivelinessChangedInfo = rmw_liveliness_changed_status_t;
-using QOSLivelinessLostInfo = rmw_liveliness_lost_t;
+using QOSLivelinessLostInfo = rmw_liveliness_lost_status_t;
 
 using QOSDeadlineRequestedCallbackType = std::function<void(QOSDeadlineRequestedInfo&)>;
 using QOSDeadlineOfferedCallbackType = std::function<void(QOSDeadlineOfferedInfo&)>;
@@ -65,17 +65,16 @@ template<typename EventCallbackT>
 class QOSEventHandler : public QOSEventHandlerBase
 {
 public:
-  template<typename InitFuncT, typename HandleT, typename OptionsT, typename EventTypeEnum>
+  template<typename InitFuncT, typename ParentHandleT, typename EventTypeEnum>
   QOSEventHandler(
     const EventCallbackT & callback,
     InitFuncT init_func,
-    HandleT handle,
-    OptionsT options,
-    EventTypeEnum type)
+    ParentHandleT parent_handle,
+    EventTypeEnum event_type)
   : event_callback_(callback)
   {
     event_handle_ = rcl_get_zero_initialized_event();
-    rcl_ret_t ret = init_func(&event_handle_, handle, options, type);
+    rcl_ret_t ret = init_func(&event_handle_, parent_handle, event_type);
     if (ret != RCL_RET_OK) {
       rclcpp::exceptions::throw_from_rcl_error(ret, "could not create event");
     }

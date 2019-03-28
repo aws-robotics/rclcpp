@@ -186,15 +186,13 @@ protected:
   void
   add_event_handler(
     const EventCallbackT & callback,
-    const rcl_publisher_options_t & publisher_options,
     const rcl_publisher_event_type_t event_type)
   {
     event_handlers_.emplace_back(std::make_shared<QOSEventHandler<EventCallbackT>>(
-        callback,
-        rcl_publisher_event_init,
-        &publisher_handle_,
-        &publisher_options,
-        event_type));
+      callback,
+      rcl_publisher_event_init,
+      &publisher_handle_,
+      event_type));
   }
 
   std::shared_ptr<rcl_node_t> rcl_node_handle_;
@@ -244,11 +242,11 @@ public:
 
     if (event_callbacks.deadline_callback_) {
       this->add_event_handler(event_callbacks.deadline_callback_,
-        publisher_options, RCL_PUBLISHER_DEADLINE);
+        RCL_PUBLISHER_OFFERED_DEADLINE_MISSED);
     }
     if (event_callbacks.liveliness_callback_) {
       this->add_event_handler(event_callbacks.liveliness_callback_,
-        publisher_options, RCL_PUBLISHER_LIVELINESS);
+        RCL_PUBLISHER_LIVELINESS_LOST);
     }
   }
 

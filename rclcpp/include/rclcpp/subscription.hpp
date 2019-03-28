@@ -157,15 +157,13 @@ protected:
   void
   add_event_handler(
     const EventCallbackT & callback,
-    const rcl_subscription_options_t & subscription_options,
     const rcl_subscription_event_type_t event_type)
   {
     event_handlers_.emplace_back(std::make_shared<QOSEventHandler<EventCallbackT>>(
-        callback,
-        rcl_subscription_event_init,
-        get_subscription_handle().get(),
-        &subscription_options,
-        event_type));
+      callback,
+      rcl_subscription_event_init,
+      get_subscription_handle().get(),
+      event_type));
   }
 
   using IntraProcessManagerWeakPtr =
@@ -243,11 +241,11 @@ public:
   {
     if (event_callbacks.deadline_callback_) {
       this->add_event_handler(event_callbacks.deadline_callback_,
-        subscription_options, RCL_SUBSCRIPTION_DEADLINE);
+        RCL_SUBSCRIPTION_REQUESTED_DEADLINE_MISSED);
     }
     if (event_callbacks.liveliness_callback_) {
       this->add_event_handler(event_callbacks.liveliness_callback_,
-        subscription_options, RCL_SUBSCRIPTION_LIVELINESS);
+        RCL_SUBSCRIPTION_LIVELINESS_CHANGED);
     }
   }
 
