@@ -21,19 +21,23 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <vector>
 #include <sstream>
 #include <string>
 
 #include "rcl/error_handling.h"
 #include "rcl/publisher.h"
 
+#include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rcl_interfaces/msg/intra_process_message.hpp"
 
+#include "rclcpp/publisher_options.hpp"
+#include "rclcpp/waitable.hpp"
+#include "rclcpp/qos_event.hpp"
+#include "rclcpp/exceptions.hpp"
 #include "rclcpp/allocator/allocator_common.hpp"
 #include "rclcpp/allocator/allocator_deleter.hpp"
 #include "rclcpp/macros.hpp"
-#include "rclcpp/node_interfaces/node_base_interface.hpp"
-#include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
 
 namespace rclcpp
@@ -42,6 +46,7 @@ namespace rclcpp
 // Forward declaration is used for friend statement.
 namespace node_interfaces
 {
+class NodeBaseInterface;
 class NodeTopicsInterface;
 }
 
@@ -116,6 +121,10 @@ public:
   const rcl_publisher_t *
   get_publisher_handle() const;
 
+  RCLCPP_PUBLIC
+  const std::vector<std::shared_ptr<QOSEventHandlerBase>> &
+  get_event_handlers() const;
+
   /// Get subscription count
   /** \return The number of subscriptions. */
   RCLCPP_PUBLIC
@@ -127,6 +136,17 @@ public:
   RCLCPP_PUBLIC
   size_t
   get_intra_process_subscription_count() const;
+
+  /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_MANUAL_BY_TOPIC)
+  /**
+   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_MANUAL_BY_TOPIC, the creator of this
+   * Publisher must manually call `assert_liveliness` on a regular basis to signal to the rest of
+   * the system that this Node is still alive.
+   * This function must be called at least as often as the qos_profile's liveliness_lease_duration
+   */
+  RCLCPP_PUBLIC
+  void
+  assert_liveliness() {}
 
   /// Compare this publisher to a gid.
   /**
@@ -162,10 +182,25 @@ public:
     const rcl_publisher_options_t & intra_process_options);
 
 protected:
+  template<typename EventCallbackT>
+  void
+  add_event_handler(
+    const EventCallbackT & callback,
+    const rcl_publisher_event_type_t event_type)
+  {
+    event_handlers_.emplace_back(std::make_shared<QOSEventHandler<EventCallbackT>>(
+      callback,
+      rcl_publisher_event_init,
+      &publisher_handle_,
+      event_type));
+  }
+
   std::shared_ptr<rcl_node_t> rcl_node_handle_;
 
   rcl_publisher_t publisher_handle_ = rcl_get_zero_initialized_publisher();
   rcl_publisher_t intra_process_publisher_handle_ = rcl_get_zero_initialized_publisher();
+  
+  std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
   using IntraProcessManagerWeakPtr =
     std::weak_ptr<rclcpp::intra_process_manager::IntraProcessManager>;
@@ -194,6 +229,7 @@ public:
     rclcpp::node_interfaces::NodeBaseInterface * node_base,
     const std::string & topic,
     const rcl_publisher_options_t & publisher_options,
+    const PublisherEventCallbacks & event_callbacks,
     const std::shared_ptr<MessageAlloc> & allocator)
   : PublisherBase(
       node_base,
@@ -203,6 +239,15 @@ public:
     message_allocator_(allocator)
   {
     allocator::set_allocator_for_deleter(&message_deleter_, message_allocator_.get());
+
+    if (event_callbacks.deadline_callback_) {
+      this->add_event_handler(event_callbacks.deadline_callback_,
+        RCL_PUBLISHER_OFFERED_DEADLINE_MISSED);
+    }
+    if (event_callbacks.liveliness_callback_) {
+      this->add_event_handler(event_callbacks.liveliness_callback_,
+        RCL_PUBLISHER_LIVELINESS_LOST);
+    }
   }
 
   virtual ~Publisher()

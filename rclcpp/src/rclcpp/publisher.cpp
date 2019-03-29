@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <vector>
 #include <sstream>
 #include <string>
 
@@ -152,6 +153,12 @@ const rcl_publisher_t *
 PublisherBase::get_publisher_handle() const
 {
   return &publisher_handle_;
+}
+
+const std::vector<std::shared_ptr<rclcpp::QOSEventHandlerBase>> &
+PublisherBase::get_event_handlers() const
+{
+  return event_handlers_;
 }
 
 size_t

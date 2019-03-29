@@ -15,12 +15,15 @@
 #ifndef RCLCPP_LIFECYCLE__LIFECYCLE_NODE_IMPL_HPP_
 #define RCLCPP_LIFECYCLE__LIFECYCLE_NODE_IMPL_HPP_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "rclcpp/contexts/default_context.hpp"
 #include "rclcpp/intra_process_manager.hpp"
+#include "rclcpp/event.hpp"
 #include "rclcpp/parameter.hpp"
 #include "rclcpp/create_publisher.hpp"
 #include "rclcpp/create_service.hpp"
@@ -63,6 +66,8 @@ LifecycleNode::create_publisher(
     this->node_topics_.get(),
     topic_name,
     qos_profile,
+    rclcpp::PublisherEventCallbacks(),
+    nullptr,
     use_intra_process_comms_,
     allocator);
 }
@@ -97,6 +102,7 @@ LifecycleNode::create_subscription(
     topic_name,
     std::forward<CallbackT>(callback),
     qos_profile,
+    rclcpp::SubscriptionEventCallbacks(),
     group,
     ignore_local_publications,
     use_intra_process_comms_,
@@ -199,6 +205,92 @@ void
 LifecycleNode::register_param_change_callback(CallbackT && callback)
 {
   this->node_parameters_->register_param_change_callback(std::forward<CallbackT>(callback));
+}
+
+template<typename ParameterT>
+void
+LifecycleNode::set_parameter_if_not_set(
+  const std::string & name,
+  const ParameterT & value)
+{
+  rclcpp::Parameter parameter;
+  if (!this->get_parameter(name, parameter)) {
+    this->set_parameters({
+        rclcpp::Parameter(name, value),
+      });
+  }
+}
+
+// this is a partially-specialized version of set_parameter_if_not_set above,
+// where our concrete type for ParameterT is std::map, but the to-be-determined
+// type is the value in the map.
+template<typename MapValueT>
+void
+LifecycleNode::set_parameters_if_not_set(
+  const std::string & name,
+  const std::map<std::string, MapValueT> & values)
+{
+  std::vector<rclcpp::Parameter> params;
+
+  for (const auto & val : values) {
+    std::string param_name = name + "." + val.first;
+    rclcpp::Parameter parameter;
+    if (!this->get_parameter(param_name, parameter)) {
+      params.push_back(rclcpp::Parameter(param_name, val.second));
+    }
+  }
+
+  this->set_parameters(params);
+}
+
+// this is a partially-specialized version of get_parameter above,
+// where our concrete type for ParameterT is std::map, but the to-be-determined
+// type is the value in the map.
+template<typename MapValueT>
+bool
+LifecycleNode::get_parameters(
+  const std::string & name,
+  std::map<std::string, MapValueT> & values) const
+{
+  std::map<std::string, rclcpp::Parameter> params;
+  bool result = node_parameters_->get_parameters_by_prefix(name, params);
+  if (result) {
+    for (const auto & param : params) {
+      values[param.first] = param.second.get_value<MapValueT>();
+    }
+  }
+
+  return result;
+}
+
+template<typename ParameterT>
+bool
+LifecycleNode::get_parameter_or(
+  const std::string & name,
+  ParameterT & value,
+  const ParameterT & alternative_value) const
+{
+  bool got_parameter = get_parameter(name, value);
+  if (!got_parameter) {
+    value = alternative_value;
+  }
+  return got_parameter;
+}
+
+template<typename ParameterT>
+void
+LifecycleNode::get_parameter_or_set(
+  const std::string & name,
+  ParameterT & value,
+  const ParameterT & alternative_value)
+{
+  bool got_parameter = get_parameter(name, value);
+  if (!got_parameter) {
+    this->set_parameters({
+        rclcpp::Parameter(name, alternative_value),
+      });
+    value = alternative_value;
+  }
 }
 
 }  // namespace rclcpp_lifecycle
