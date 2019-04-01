@@ -188,11 +188,12 @@ protected:
     const EventCallbackT & callback,
     const rcl_publisher_event_type_t event_type)
   {
-    event_handlers_.emplace_back(std::make_shared<QOSEventHandler<EventCallbackT>>(
+    auto handler = std::make_shared<QOSEventHandler<EventCallbackT>>(
       callback,
       rcl_publisher_event_init,
       &publisher_handle_,
-      event_type));
+      event_type);
+    event_handlers_.emplace_back(handler);
   }
 
   std::shared_ptr<rcl_node_t> rcl_node_handle_;
@@ -240,12 +241,12 @@ public:
   {
     allocator::set_allocator_for_deleter(&message_deleter_, message_allocator_.get());
 
-    if (event_callbacks.deadline_callback_) {
-      this->add_event_handler(event_callbacks.deadline_callback_,
+    if (event_callbacks.deadline_callback) {
+      this->add_event_handler(event_callbacks.deadline_callback,
         RCL_PUBLISHER_OFFERED_DEADLINE_MISSED);
     }
-    if (event_callbacks.liveliness_callback_) {
-      this->add_event_handler(event_callbacks.liveliness_callback_,
+    if (event_callbacks.liveliness_callback) {
+      this->add_event_handler(event_callbacks.liveliness_callback,
         RCL_PUBLISHER_LIVELINESS_LOST);
     }
   }

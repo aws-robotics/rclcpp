@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "rclcpp/visibility_control.hpp"
 #include "rclcpp/qos_event.hpp"
+#include "rclcpp/visibility_control.hpp"
 
 namespace rclcpp
 {

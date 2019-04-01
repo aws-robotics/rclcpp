@@ -34,10 +34,10 @@ using QOSDeadlineOfferedInfo = rmw_offered_deadline_missed_status_t;
 using QOSLivelinessChangedInfo = rmw_liveliness_changed_status_t;
 using QOSLivelinessLostInfo = rmw_liveliness_lost_status_t;
 
-using QOSDeadlineRequestedCallbackType = std::function<void(QOSDeadlineRequestedInfo&)>;
-using QOSDeadlineOfferedCallbackType = std::function<void(QOSDeadlineOfferedInfo&)>;
-using QOSLivelinessChangedCallbackType = std::function<void(QOSLivelinessChangedInfo&)>;
-using QOSLivelinessLostCallbackType = std::function<void(QOSLivelinessLostInfo&)>;
+using QOSDeadlineRequestedCallbackType = std::function<void (QOSDeadlineRequestedInfo &)>;
+using QOSDeadlineOfferedCallbackType = std::function<void (QOSDeadlineOfferedInfo &)>;
+using QOSLivelinessChangedCallbackType = std::function<void (QOSLivelinessChangedInfo &)>;
+using QOSLivelinessLostCallbackType = std::function<void (QOSLivelinessLostInfo &)>;
 
 
 class QOSEventHandlerBase : public Waitable
