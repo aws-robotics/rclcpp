@@ -28,6 +28,7 @@
 #include "rclcpp/create_publisher.hpp"
 #include "rclcpp/create_service.hpp"
 #include "rclcpp/create_subscription.hpp"
+#include "rclcpp/subscription_options.hpp"
 #include "rclcpp/type_support_decl.hpp"
 
 #include "lifecycle_publisher.hpp"
@@ -132,6 +133,7 @@ LifecycleNode::create_subscription(
     topic_name,
     std::forward<CallbackT>(callback),
     qos,
+    rclcpp::SubscriptionEventCallbacks(),
     group,
     ignore_local_publications,
     msg_mem_strat,

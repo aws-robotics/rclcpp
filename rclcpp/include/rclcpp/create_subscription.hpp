@@ -54,7 +54,7 @@ create_subscription(
   auto factory = rclcpp::create_subscription_factory
     <MessageT, CallbackT, AllocatorT, CallbackMessageT, SubscriptionT>(
     std::forward<CallbackT>(callback),
-    event_callbacks, 
+    event_callbacks,
     msg_mem_strat,
     allocator);
 

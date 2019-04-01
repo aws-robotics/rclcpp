@@ -28,25 +28,26 @@
 #include "rcl/error_handling.h"
 #include "rcl/publisher.h"
 
-#include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rcl_interfaces/msg/intra_process_message.hpp"
 
-#include "rclcpp/publisher_options.hpp"
-#include "rclcpp/waitable.hpp"
-#include "rclcpp/qos_event.hpp"
-#include "rclcpp/exceptions.hpp"
 #include "rclcpp/allocator/allocator_common.hpp"
 #include "rclcpp/allocator/allocator_deleter.hpp"
+#include "rclcpp/exceptions.hpp"
 #include "rclcpp/macros.hpp"
+#include "rclcpp/publisher_options.hpp"
+#include "rclcpp/qos_event.hpp"
+#include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
 
 namespace rclcpp
 {
 
-// Forward declaration is used for friend statement.
 namespace node_interfaces
 {
+// NOTE(emersonknapp) Forward declaration avoids including node_base_interface.hpp which causes
+// circular inclusion from callback_group.hpp
 class NodeBaseInterface;
+// Forward declaration is used for friend statement.
 class NodeTopicsInterface;
 }
 
@@ -140,9 +141,8 @@ public:
   /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_MANUAL_BY_TOPIC)
   /**
    * If the rmw Liveliness policy is set to RMW_QOS_POLICY_MANUAL_BY_TOPIC, the creator of this
-   * Publisher must manually call `assert_liveliness` on a regular basis to signal to the rest of
-   * the system that this Node is still alive.
-   * This function must be called at least as often as the qos_profile's liveliness_lease_duration
+   * Publisher must manually call `assert_liveliness` periodically to signal that this Publisher
+   * is still alive. Must be called at least as often as qos_profile's Liveliness lease_duration
    */
   RCLCPP_PUBLIC
   void
@@ -199,7 +199,7 @@ protected:
 
   rcl_publisher_t publisher_handle_ = rcl_get_zero_initialized_publisher();
   rcl_publisher_t intra_process_publisher_handle_ = rcl_get_zero_initialized_publisher();
-  
+
   std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
   using IntraProcessManagerWeakPtr =
