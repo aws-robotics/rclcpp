@@ -28,6 +28,7 @@
 #include "rcl/error_handling.h"
 #include "rcl/publisher.h"
 
+#include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rcl_interfaces/msg/intra_process_message.hpp"
 
 #include "rclcpp/allocator/allocator_common.hpp"
@@ -200,6 +201,8 @@ protected:
 
   rcl_publisher_t publisher_handle_ = rcl_get_zero_initialized_publisher();
   rcl_publisher_t intra_process_publisher_handle_ = rcl_get_zero_initialized_publisher();
+  
+  std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
   std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 

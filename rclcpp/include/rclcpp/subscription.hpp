@@ -30,7 +30,10 @@
 
 #include "rcl_interfaces/msg/intra_process_message.hpp"
 
+#include "rclcpp/subscription_options.hpp"
+#include "rclcpp/waitable.hpp"
 #include "rclcpp/any_subscription_callback.hpp"
+#include "rclcpp/qos_event.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/expand_topic_or_service_name.hpp"
 #include "rclcpp/macros.hpp"

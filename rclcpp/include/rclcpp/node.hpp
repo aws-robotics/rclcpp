@@ -142,8 +142,8 @@ public:
   /// Create and return a Publisher. Note: This constructor is deprecated
   /**
    * \param[in] topic_name The topic for this publisher to publish on.
-   * \param[in] qos_history_depth The depth of the publisher message queue.
-   * \param[in] allocator Optional custom allocator.
+   * \param[in] group The callback group for this publisher. NULL for no callback group.
+   * \param[in] options Additional options to control creation of the publisher.
    * \return Shared pointer to the created publisher.
    */
   template<
@@ -214,21 +214,15 @@ public:
     CallbackT && callback,
     const rmw_qos_profile_t & qos_profile = rmw_qos_profile_default,
     rclcpp::callback_group::CallbackGroup::SharedPtr group = nullptr,
-    bool ignore_local_publications = false,
-    typename rclcpp::message_memory_strategy::MessageMemoryStrategy<
-      typename rclcpp::subscription_traits::has_message_type<CallbackT>::type, Alloc>::SharedPtr
-    msg_mem_strat = nullptr,
-    std::shared_ptr<Alloc> allocator = nullptr);
+    const PublisherOptions<Alloc> & options = PublisherOptions<Alloc>());
 
   /// Create and return a Subscription. Note: this constructor is deprecated
   /**
    * \param[in] topic_name The topic to subscribe on.
-   * \param[in] qos_history_depth The depth of the subscription's incoming message queue.
    * \param[in] callback The user-defined callback function.
    * \param[in] group The callback group for this subscription. NULL for no callback group.
-   * \param[in] ignore_local_publications True to ignore local publications.
+   * \param[in] options Additional options to control creation of the subscription.
    * \param[in] msg_mem_strat The message memory strategy to use for allocating messages.
-   * \param[in] allocator Optional custom allocator.
    * \return Shared pointer to the created subscription.
    */
   /* TODO(jacquelinekay):
@@ -245,13 +239,11 @@ public:
   create_subscription(
     const std::string & topic_name,
     CallbackT && callback,
-    size_t qos_history_depth,
     rclcpp::callback_group::CallbackGroup::SharedPtr group = nullptr,
-    bool ignore_local_publications = false,
+    const SubscriptionOptions<Alloc> & options = SubscriptionOptions<Alloc>(),
     typename rclcpp::message_memory_strategy::MessageMemoryStrategy<
       typename rclcpp::subscription_traits::has_message_type<CallbackT>::type, Alloc>::SharedPtr
-    msg_mem_strat = nullptr,
-    std::shared_ptr<Alloc> allocator = nullptr);
+    msg_mem_strat = nullptr);
 
   /// Create and return a Subscription.
   /**
