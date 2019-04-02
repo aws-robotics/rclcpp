@@ -200,7 +200,7 @@ protected:
 
   rcl_publisher_t publisher_handle_ = rcl_get_zero_initialized_publisher();
   rcl_publisher_t intra_process_publisher_handle_ = rcl_get_zero_initialized_publisher();
-  
+
   std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
   using IntraProcessManagerWeakPtr =

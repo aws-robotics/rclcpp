@@ -30,8 +30,6 @@
 
 #include "rcl_interfaces/msg/intra_process_message.hpp"
 
-#include "rclcpp/subscription_options.hpp"
-#include "rclcpp/waitable.hpp"
 #include "rclcpp/any_subscription_callback.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/expand_topic_or_service_name.hpp"
@@ -42,6 +40,7 @@
 #include "rclcpp/subscription_traits.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
+#include "rclcpp/waitable.hpp"
 
 namespace rclcpp
 {
