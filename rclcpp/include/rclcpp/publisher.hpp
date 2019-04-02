@@ -138,15 +138,16 @@ public:
   size_t
   get_intra_process_subscription_count() const;
 
-  /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_MANUAL_BY_TOPIC)
+  /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC)
   /**
-   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_MANUAL_BY_TOPIC, the creator of this
-   * Publisher must manually call `assert_liveliness` periodically to signal that this Publisher
-   * is still alive. Must be called at least as often as qos_profile's Liveliness lease_duration
+   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC, the creator
+   * of this Publisher must manually call `assert_liveliness` on a regular basis to signal to the
+   * rest of the system that this Node is still alive.
+   * This function must be called at least as often as the qos_profile's liveliness_lease_duration
    */
   RCLCPP_PUBLIC
-  void
-  assert_liveliness() {}
+  bool
+  assert_liveliness() const;
 
   /// Compare this publisher to a gid.
   /**
