@@ -85,7 +85,6 @@ Node::create_publisher(
   const rmw_qos_profile_t & qos_profile,
   std::shared_ptr<Alloc> allocator)
 {
-  std::shared_ptr<Alloc> allocator = options.allocator();
   if (!allocator) {
     allocator = std::make_shared<Alloc>();
   }
@@ -133,13 +132,14 @@ Node::create_subscription(
   CallbackT && callback,
   const rmw_qos_profile_t & qos_profile,
   rclcpp::callback_group::CallbackGroup::SharedPtr group,
+  bool ignore_local_publications,
   typename rclcpp::message_memory_strategy::MessageMemoryStrategy<
     typename rclcpp::subscription_traits::has_message_type<CallbackT>::type, Alloc>::SharedPtr
-  msg_mem_strat)
+  msg_mem_strat,
+  std::shared_ptr<Alloc> allocator)
 {
   using CallbackMessageT = typename rclcpp::subscription_traits::has_message_type<CallbackT>::type;
 
-  std::shared_ptr<Alloc> allocator = options.allocator();
   if (!allocator) {
     allocator = std::make_shared<Alloc>();
   }
@@ -156,7 +156,7 @@ Node::create_subscription(
     qos_profile,
     SubscriptionEventCallbacks(),
     group,
-    options.ignore_local_publications(),
+    ignore_local_publications,
     this->get_node_options().use_intra_process_comms(),
     msg_mem_strat,
     allocator);

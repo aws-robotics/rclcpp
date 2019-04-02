@@ -28,7 +28,6 @@
 #include "rcl/error_handling.h"
 #include "rcl/publisher.h"
 
-#include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rcl_interfaces/msg/intra_process_message.hpp"
 
 #include "rclcpp/allocator/allocator_common.hpp"
