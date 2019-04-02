@@ -141,9 +141,8 @@ public:
   /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC)
   /**
    * If the rmw Liveliness policy is set to RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC, the creator
-   * of this Publisher must manually call `assert_liveliness` on a regular basis to signal to the
+   * of this publisher may manually call `assert_liveliness` at some point in time to signal to the
    * rest of the system that this Node is still alive.
-   * This function must be called at least as often as the qos_profile's liveliness_lease_duration
    */
   RCLCPP_PUBLIC
   bool
