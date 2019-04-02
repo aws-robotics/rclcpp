@@ -204,8 +204,6 @@ protected:
   
   std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
-  std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
-
   using IntraProcessManagerWeakPtr =
     std::weak_ptr<rclcpp::intra_process_manager::IntraProcessManager>;
   bool use_intra_process_;
