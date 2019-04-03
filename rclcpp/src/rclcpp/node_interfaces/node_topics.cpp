@@ -72,9 +72,13 @@ NodeTopics::add_publisher(
     if (!node_base_->callback_group_in_node(callback_group)) {
       throw std::runtime_error("Cannot create publisher, callback group not in node.");
     }
-    callback_group->add_publisher(publisher);
   } else {
-    node_base_->get_default_callback_group()->add_publisher(publisher);
+    callback_group = node_base_->get_default_callback_group();
+  }
+
+  callback_group->add_publisher(publisher);
+  for (auto & publisher_event : publisher->get_event_handlers()) {
+    callback_group->add_waitable(publisher_event);
   }
 
   // Notify the executor that a new publisher was created using the parent Node.
@@ -122,9 +126,13 @@ NodeTopics::add_subscription(
       // TODO(jacquelinekay): use custom exception
       throw std::runtime_error("Cannot create subscription, callback group not in node.");
     }
-    callback_group->add_subscription(subscription);
   } else {
-    node_base_->get_default_callback_group()->add_subscription(subscription);
+    callback_group = node_base_->get_default_callback_group();
+  }
+
+  callback_group->add_subscription(subscription);
+  for (auto & subscription_event : subscription->get_event_handlers()) {
+    callback_group->add_waitable(subscription_event);
   }
 
   // Notify the executor that a new subscription was created using the parent Node.
