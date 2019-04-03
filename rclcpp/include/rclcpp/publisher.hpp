@@ -138,15 +138,15 @@ public:
   size_t
   get_intra_process_subscription_count() const;
 
-  /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_MANUAL_BY_TOPIC)
+  /// Manually assert that this Publisher is alive (for RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC)
   /**
-   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_MANUAL_BY_TOPIC, the creator of this
-   * Publisher must manually call `assert_liveliness` periodically to signal that this Publisher
-   * is still alive. Must be called at least as often as qos_profile's Liveliness lease_duration
+   * If the rmw Liveliness policy is set to RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC, the creator
+   * of this publisher may manually call `assert_liveliness` at some point in time to signal to the
+   * rest of the system that this Node is still alive.
    */
   RCLCPP_PUBLIC
-  void
-  assert_liveliness() {}
+  bool
+  assert_liveliness() const;
 
   /// Compare this publisher to a gid.
   /**
@@ -200,7 +200,7 @@ protected:
 
   rcl_publisher_t publisher_handle_ = rcl_get_zero_initialized_publisher();
   rcl_publisher_t intra_process_publisher_handle_ = rcl_get_zero_initialized_publisher();
-  
+
   std::vector<std::shared_ptr<QOSEventHandlerBase>> event_handlers_;
 
   using IntraProcessManagerWeakPtr =

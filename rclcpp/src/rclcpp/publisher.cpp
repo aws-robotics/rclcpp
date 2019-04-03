@@ -205,6 +205,12 @@ PublisherBase::get_intra_process_subscription_count() const
 }
 
 bool
+PublisherBase::assert_liveliness() const
+{
+  return RCL_RET_OK == rcl_publisher_assert_liveliness(&publisher_handle_);
+}
+
+bool
 PublisherBase::operator==(const rmw_gid_t & gid) const
 {
   return *this == &gid;
