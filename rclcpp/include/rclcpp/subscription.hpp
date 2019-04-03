@@ -33,11 +33,12 @@
 #include "rclcpp/subscription_options.hpp"
 #include "rclcpp/waitable.hpp"
 #include "rclcpp/any_subscription_callback.hpp"
-#include "rclcpp/qos_event.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/expand_topic_or_service_name.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/message_memory_strategy.hpp"
+#include "rclcpp/qos_event.hpp"
+#include "rclcpp/subscription_options.hpp"
 #include "rclcpp/subscription_traits.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -159,11 +160,12 @@ protected:
     const EventCallbackT & callback,
     const rcl_subscription_event_type_t event_type)
   {
-    event_handlers_.emplace_back(std::make_shared<QOSEventHandler<EventCallbackT>>(
+    auto handler = std::make_shared<QOSEventHandler<EventCallbackT>>(
       callback,
       rcl_subscription_event_init,
       get_subscription_handle().get(),
-      event_type));
+      event_type);
+    event_handlers_.emplace_back(handler);
   }
 
   using IntraProcessManagerWeakPtr =
@@ -239,12 +241,12 @@ public:
     get_intra_process_message_callback_(nullptr),
     matches_any_intra_process_publishers_(nullptr)
   {
-    if (event_callbacks.deadline_callback_) {
-      this->add_event_handler(event_callbacks.deadline_callback_,
+    if (event_callbacks.deadline_callback) {
+      this->add_event_handler(event_callbacks.deadline_callback,
         RCL_SUBSCRIPTION_REQUESTED_DEADLINE_MISSED);
     }
-    if (event_callbacks.liveliness_callback_) {
-      this->add_event_handler(event_callbacks.liveliness_callback_,
+    if (event_callbacks.liveliness_callback) {
+      this->add_event_handler(event_callbacks.liveliness_callback,
         RCL_SUBSCRIPTION_LIVELINESS_CHANGED);
     }
   }

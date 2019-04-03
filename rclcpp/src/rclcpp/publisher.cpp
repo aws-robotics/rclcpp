@@ -166,7 +166,7 @@ PublisherBase::get_subscription_count() const
 {
   size_t inter_process_subscription_count = 0;
 
-  rmw_ret_t status = rcl_publisher_get_subscription_count(
+  rcl_ret_t status = rcl_publisher_get_subscription_count(
     &publisher_handle_,
     &inter_process_subscription_count);
 
