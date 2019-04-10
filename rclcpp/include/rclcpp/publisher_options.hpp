@@ -20,26 +20,22 @@
 #include <vector>
 
 #include "rclcpp/qos_event.hpp"
+#include "rclcpp/callback_group.hpp"
+#include "rclcpp/intra_process_setting.hpp"
 #include "rclcpp/visibility_control.hpp"
-
 
 namespace rclcpp
 {
 
-/// Contains callbacks for various types of events a Publisher can receive from the middleware
-struct PublisherEventCallbacks
-{
-  QOSDeadlineOfferedCallbackType deadline_callback;
-  QOSLivelinessLostCallbackType liveliness_callback;
-};
-
-/// Structure containing configuration options for Publishers/Subscribers
+/// Structure containing optional configuration for Publishers.
 template<typename Alloc = std::allocator<void>>
 struct PublisherOptions
 {
   PublisherEventCallbacks event_callbacks;
   rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
-  std::shared_ptr<Alloc> allocator = nullptr;
+  rclcpp::callback_group::CallbackGroup::SharedPtr callback_group;
+  std::shared_ptr<Alloc> allocator;
+  IntraProcessSetting use_intra_process_comm = IntraProcessSetting::NodeDefault;
 };
 
 }  // namespace rclcpp

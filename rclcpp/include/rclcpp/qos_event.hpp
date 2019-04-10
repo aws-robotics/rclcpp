@@ -39,6 +39,19 @@ using QOSDeadlineOfferedCallbackType = std::function<void (QOSDeadlineOfferedInf
 using QOSLivelinessChangedCallbackType = std::function<void (QOSLivelinessChangedInfo &)>;
 using QOSLivelinessLostCallbackType = std::function<void (QOSLivelinessLostInfo &)>;
 
+/// Contains callbacks for various types of events a Publisher can receive from the middleware
+struct PublisherEventCallbacks
+{
+  QOSDeadlineOfferedCallbackType deadline_callback;
+  QOSLivelinessLostCallbackType liveliness_callback;
+};
+
+/// Contains callbacks for non-message events that a Subscriber can receive from the middleware
+struct SubscriptionEventCallbacks
+{
+  QOSDeadlineRequestedCallbackType deadline_callback;
+  QOSLivelinessChangedCallbackType liveliness_callback;
+};
 
 class QOSEventHandlerBase : public Waitable
 {

@@ -20,26 +20,23 @@
 #include <vector>
 
 #include "rclcpp/qos_event.hpp"
+#include "rclcpp/callback_group.hpp"
+#include "rclcpp/intra_process_setting.hpp"
 #include "rclcpp/visibility_control.hpp"
 
 namespace rclcpp
 {
 
-/// Contains callbacks for non-message events that a Subscriber can receive from the middleware
-struct SubscriptionEventCallbacks
-{
-  QOSDeadlineRequestedCallbackType deadline_callback;
-  QOSLivelinessChangedCallbackType liveliness_callback;
-};
-
-
+/// Structure containing optional configuration for Subscriptions.
 template<typename Alloc = std::allocator<void>>
 struct SubscriptionOptions
 {
   SubscriptionEventCallbacks event_callbacks;
   rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
   bool ignore_local_publications = false;
-  std::shared_ptr<Alloc> allocator = nullptr;
+  rclcpp::callback_group::CallbackGroup::SharedPtr callback_group;
+  std::shared_ptr<Alloc> allocator;
+  IntraProcessSetting use_intra_process_comm = IntraProcessSetting::NodeDefault;
 };
 
 }  // namespace rclcpp

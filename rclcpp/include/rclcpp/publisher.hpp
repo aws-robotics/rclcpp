@@ -34,7 +34,6 @@
 #include "rclcpp/allocator/allocator_deleter.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/macros.hpp"
-#include "rclcpp/publisher_options.hpp"
 #include "rclcpp/qos_event.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -148,6 +147,20 @@ public:
   bool
   assert_liveliness() const;
 
+  /// Get the actual QoS settings, after the defaults have been determined.
+  /**
+   * The actual configuration applied when using RMW_QOS_POLICY_*_SYSTEM_DEFAULT
+   * can only be resolved after the creation of the publisher, and it
+   * depends on the underlying rmw implementation.
+   * If the underlying setting in use can't be represented in ROS terms,
+   * it will be set to RMW_QOS_POLICY_*_UNKNOWN.
+   * May throw runtime_error when an unexpected error occurs.
+   * \return The actual qos settings.
+   */
+  RCLCPP_PUBLIC
+  rmw_qos_profile_t
+  get_actual_qos() const;
+
   /// Compare this publisher to a gid.
   /**
    * Note that this function calls the next function.
@@ -205,7 +218,7 @@ protected:
 
   using IntraProcessManagerWeakPtr =
     std::weak_ptr<rclcpp::intra_process_manager::IntraProcessManager>;
-  bool use_intra_process_;
+  bool intra_process_is_enabled_;
   IntraProcessManagerWeakPtr weak_ipm_;
   uint64_t intra_process_publisher_id_;
   StoreMessageCallbackT store_intra_process_message_;
@@ -262,7 +275,11 @@ public:
   virtual void
   publish(std::unique_ptr<MessageT, MessageDeleter> & msg)
   {
-    this->do_inter_process_publish(msg.get());
+    bool inter_process_subscriptions_exist =
+      get_subscription_count() > get_intra_process_subscription_count();
+    if (!intra_process_is_enabled_ || inter_process_subscriptions_exist) {
+      this->do_inter_process_publish(msg.get());
+    }
     if (store_intra_process_message_) {
       // Take the pointer from the unique_msg, release it and pass as a void *
       // to the ipm. The ipm should then capture it again as a unique_ptr of
