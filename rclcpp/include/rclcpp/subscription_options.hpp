@@ -28,8 +28,8 @@ namespace rclcpp
 {
 
 /// Structure containing optional configuration for Subscriptions.
-template<typename Alloc = std::allocator<void>>
-struct SubscriptionOptions
+template<typename Allocator>
+struct SubscriptionOptionsWithAllocator
 {
   SubscriptionEventCallbacks event_callbacks;
   /// The quality of service profile to pass on to the rmw implementation.
@@ -39,10 +39,12 @@ struct SubscriptionOptions
   /// The callback group for this subscription. NULL to use the default callback group.
   rclcpp::callback_group::CallbackGroup::SharedPtr callback_group;
   /// Optional custom allocator.
-  std::shared_ptr<Alloc> allocator;
+  std::shared_ptr<Allocator> allocator;
   /// Setting to explicitly set intraprocess communications.
   IntraProcessSetting use_intra_process_comm = IntraProcessSetting::NodeDefault;
 };
+
+using SubscriptionOptions = SubscriptionOptionsWithAllocator<std::allocator<void>>;
 
 }  // namespace rclcpp
 
