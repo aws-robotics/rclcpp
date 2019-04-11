@@ -82,6 +82,9 @@ PublisherBase::PublisherBase(
 
 PublisherBase::~PublisherBase()
 {
+  // must fini the events before fini-ing the publisher
+  event_handlers_.clear();
+
   if (rcl_publisher_fini(&intra_process_publisher_handle_, rcl_node_handle_.get()) != RCL_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rclcpp",

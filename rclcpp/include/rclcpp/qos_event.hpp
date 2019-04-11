@@ -56,6 +56,8 @@ struct SubscriptionEventCallbacks
 class QOSEventHandlerBase : public Waitable
 {
 public:
+  virtual ~QOSEventHandlerBase();
+
   /// Get the number of ready events
   size_t
   get_number_of_ready_events() override;
@@ -90,16 +92,6 @@ public:
     rcl_ret_t ret = init_func(&event_handle_, parent_handle, event_type);
     if (ret != RCL_RET_OK) {
       rclcpp::exceptions::throw_from_rcl_error(ret, "could not create event");
-    }
-  }
-
-  ~QOSEventHandler()
-  {
-    if (rcl_event_fini(&event_handle_) != RCL_RET_OK) {
-      RCUTILS_LOG_ERROR_NAMED(
-        "rclcpp",
-        "Error in destruction of rcl event handle: %s", rcl_get_error_string().str);
-      rcl_reset_error();
     }
   }
 

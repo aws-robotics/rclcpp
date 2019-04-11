@@ -18,6 +18,16 @@
 namespace rclcpp
 {
 
+QOSEventHandlerBase::~QOSEventHandlerBase()
+{
+  if (rcl_event_fini(&event_handle_) != RCL_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rclcpp",
+      "Error in destruction of rcl event handle: %s", rcl_get_error_string().str);
+    rcl_reset_error();
+  }
+}
+
 /// Get the number of ready events
 size_t
 QOSEventHandlerBase::get_number_of_ready_events()
