@@ -1158,6 +1158,27 @@ private:
   const rclcpp::NodeOptions node_options_;
   const std::string sub_namespace_;
   const std::string effective_namespace_;
+
+  // add a callback to the list executed upon subscription
+  void register_subscription_callback(std::function<void()> &&callback) {
+    subscription_callbacks_.push_back(callback);
+  }
+
+  // add the user's callback to this function, register this as the
+  // callback to execute upon subscription, and execute any callbacks
+  // registered in subscription_callbacks_
+  std::function<void(MessageT)> call_all_callbacks(std::function<MessageT> callback()) []() {
+      callback();
+      for(const auto & active_callback: this->subscription_callbacks_) {
+        active_callback();
+      }
+    };
+  }  // TODO could just call a class method input MessageT and iterate through the list
+
+  // callbacks to execute upon subscription callback
+  std::vector<std::function<void()>> subscription_callbacks_;
+  // class that computes statistics when input messages are provided
+  std::unique_pointer<TopicStatisticsCollector> topic_statistics_collector_;
 };
 
 }  // namespace rclcpp

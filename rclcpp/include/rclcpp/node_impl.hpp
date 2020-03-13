@@ -93,11 +93,24 @@ Node::create_subscription(
   const SubscriptionOptionsWithAllocator<AllocatorT> & options,
   typename MessageMemoryStrategyT::SharedPtr msg_mem_strat)
 {
+
+  if (ros::Parameter("is_topic_enabled")) {
+
+    // TODO check if we need to create the topic_statistics_collector_
+    // TODO check if we need to bring-up th   e topic_statistics_collector_
+
+    this->register_default_subscription_callback([]() {
+      topic_statistics_collector_.OnMessageReceived(*typed_message); //todo syntax?!?!
+    });
+  }
+  // todo need to handle parameter updates and enable / disable
+
+
   return rclcpp::create_subscription<MessageT>(
     *this,
     extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
     qos,
-    std::forward<CallbackT>(callback),
+    call_all_callbacks(std::forward(callback)), // redirect
     options,
     msg_mem_strat);
 }
