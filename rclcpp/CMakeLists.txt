@@ -4,6 +4,7 @@ project(rclcpp)
 
 find_package(ament_cmake_ros REQUIRED)
 find_package(builtin_interfaces REQUIRED)
+find_package(metrics_statistics_msgs REQUIRED)
 find_package(rcl REQUIRED)
 find_package(rcl_interfaces REQUIRED)
 find_package(rcl_yaml_param_parser REQUIRED)
@@ -14,6 +15,7 @@ find_package(rosgraph_msgs REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 find_package(rosidl_typesupport_c REQUIRED)
 find_package(rosidl_typesupport_cpp REQUIRED)
+find_package(statistics_collector_lib REQUIRED)
 find_package(tracetools REQUIRED)
 
 # Default to C++14
@@ -115,9 +117,11 @@ ament_target_dependencies(${PROJECT_NAME}
   "rcpputils"
   "rcutils"
   "builtin_interfaces"
+  "metrics_statistics_msgs"
   "rosgraph_msgs"
   "rosidl_typesupport_cpp"
   "rosidl_generator_cpp"
+  "statistics_collector_lib"
   "tracetools"
 )
 
@@ -141,11 +145,13 @@ ament_export_dependencies(rcl)
 ament_export_dependencies(rcpputils)
 ament_export_dependencies(rcutils)
 ament_export_dependencies(builtin_interfaces)
+ament_export_dependencies(metrics_statistics_msgs)
 ament_export_dependencies(rosgraph_msgs)
 ament_export_dependencies(rosidl_typesupport_cpp)
 ament_export_dependencies(rosidl_typesupport_c)
 ament_export_dependencies(rosidl_generator_cpp)
 ament_export_dependencies(rcl_yaml_param_parser)
+ament_export_dependencies(statistics_collector_lib)
 ament_export_dependencies(tracetools)
 
 if(BUILD_TESTING)
@@ -243,11 +249,13 @@ if(BUILD_TESTING)
   ament_add_gtest(test_node test/test_node.cpp TIMEOUT 240)
   if(TARGET test_node)
     ament_target_dependencies(test_node
+      "metrics_statistics_msgs"
       "rcl_interfaces"
       "rcpputils"
       "rmw"
       "rosidl_generator_cpp"
       "rosidl_typesupport_cpp"
+      "statistics_collector_lib"
       "test_msgs"
     )
     target_link_libraries(test_node ${PROJECT_NAME})

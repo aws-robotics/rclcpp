@@ -190,6 +190,7 @@ public:
    * \param[in] qos_history_depth The depth of the subscription's incoming message queue.
    * \param[in] options Additional options for the creation of the Subscription.
    * \param[in] msg_mem_strat The message memory strategy to use for allocating messages.
+   *
    * \return Shared pointer to the created subscription.
    */
   template<
@@ -213,7 +214,8 @@ public:
     SubscriptionOptionsWithAllocator<AllocatorT>(),
     typename MessageMemoryStrategyT::SharedPtr msg_mem_strat = (
       MessageMemoryStrategyT::create_default()
-    )
+    ),
+    bool enable_topic_statistics = false //TODO (dabonnie): document
   );
 
   /// Create a timer.

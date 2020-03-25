@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -44,6 +45,10 @@
 #include "rclcpp/qos.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
+
+#include "rclcpp/topic_statistics/subscriber_topic_statistics.hpp"
+#include "metrics_statistics_msgs/msg/metrics_message.hpp"
+
 
 #ifndef RCLCPP__NODE_HPP_
 #include "node.hpp"
@@ -91,15 +96,56 @@ Node::create_subscription(
   const rclcpp::QoS & qos,
   CallbackT && callback,
   const SubscriptionOptionsWithAllocator<AllocatorT> & options,
-  typename MessageMemoryStrategyT::SharedPtr msg_mem_strat)
+  typename MessageMemoryStrategyT::SharedPtr msg_mem_strat,
+  bool enable_topic_statistics) // put the flag in subscriber options (instead of boolean, use enum)
 {
-  return rclcpp::create_subscription<MessageT>(
-    *this,
-    extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
-    qos,
-    std::forward<CallbackT>(callback),
-    options,
-    msg_mem_strat);
+
+  // if topic statistics enabled then
+  // 1). create publisher with input topic name (right now default constant)
+  // 2). create SubscriberTopicStatistics<MessageT>
+  // 3). create timer for the publisher, configurable period, that calls topic_stats->publish
+  // 4). forward SubscriberTopicStatistics to subscription.hpp
+  if (true) {
+
+    (void)enable_topic_statistics;
+
+    //TODO (dabonnie): fix QoS, configurable or hardcoded?
+    std::shared_ptr<Publisher<metrics_statistics_msgs::msg::MetricsMessage>> publisher =
+      this->create_publisher<metrics_statistics_msgs::msg::MetricsMessage>("topic_statistics", rclcpp::QoS(42));
+    // TODO do this per node, not per subscription, node owns this
+
+
+    auto sub_topic_stats = std::make_shared<
+      rclcpp::topic_statistics::SubcriberTopicStatistics<CallbackMessageT>
+      >(publisher);
+
+    sub_topic_stats->PublishMessage();
+
+    //todo (dabonnie): fix hardcoded duration
+    auto timer = this->create_wall_timer(std::chrono::seconds{10}, [this, &sub_topic_stats](){std::cout << "hi\n"; sub_topic_stats->PublishMessage();});
+
+    //add the timer to topic stats
+    sub_topic_stats->SetTimer(timer);
+
+    return rclcpp::create_subscription<MessageT>(
+      *this,
+      extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
+      qos,
+      std::forward<CallbackT>(callback),
+      options,
+      msg_mem_strat,
+      sub_topic_stats);
+
+  } else {
+
+    return rclcpp::create_subscription<MessageT>(
+      *this,
+      extend_name_with_sub_namespace(topic_name, this->get_sub_namespace()),
+      qos,
+      std::forward<CallbackT>(callback),
+      options,
+      msg_mem_strat);
+  }
 }
 
 template<typename DurationRepT, typename DurationT, typename CallbackT>
