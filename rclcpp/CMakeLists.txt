@@ -15,7 +15,7 @@ find_package(rosgraph_msgs REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 find_package(rosidl_typesupport_c REQUIRED)
 find_package(rosidl_typesupport_cpp REQUIRED)
-find_package(statistics_collector_lib REQUIRED)
+find_package(libstatistics_collector REQUIRED)
 find_package(tracetools REQUIRED)
 
 # Default to C++14
@@ -121,7 +121,7 @@ ament_target_dependencies(${PROJECT_NAME}
   "rosgraph_msgs"
   "rosidl_typesupport_cpp"
   "rosidl_generator_cpp"
-  "statistics_collector_lib"
+  "libstatistics_collector"
   "tracetools"
 )
 
@@ -151,7 +151,7 @@ ament_export_dependencies(rosidl_typesupport_cpp)
 ament_export_dependencies(rosidl_typesupport_c)
 ament_export_dependencies(rosidl_generator_cpp)
 ament_export_dependencies(rcl_yaml_param_parser)
-ament_export_dependencies(statistics_collector_lib)
+ament_export_dependencies(libstatistics_collector)
 ament_export_dependencies(tracetools)
 
 if(BUILD_TESTING)
@@ -255,7 +255,7 @@ if(BUILD_TESTING)
       "rmw"
       "rosidl_generator_cpp"
       "rosidl_typesupport_cpp"
-      "statistics_collector_lib"
+      "libstatistics_collector"
       "test_msgs"
     )
     target_link_libraries(test_node ${PROJECT_NAME})

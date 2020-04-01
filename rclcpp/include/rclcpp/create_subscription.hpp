@@ -69,7 +69,7 @@ create_subscription(
     std::forward<CallbackT>(callback),
     options,
     msg_mem_strat,
-    std::move(sts)
+    sts
   );
 
   auto sub = node_topics->create_subscription(topic_name, factory, qos);

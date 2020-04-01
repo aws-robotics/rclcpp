@@ -111,18 +111,18 @@ Node::create_subscription(
 
     //TODO (dabonnie): fix QoS, configurable or hardcoded?
     std::shared_ptr<Publisher<metrics_statistics_msgs::msg::MetricsMessage>> publisher =
-      this->create_publisher<metrics_statistics_msgs::msg::MetricsMessage>("topic_statistics", rclcpp::QoS(42));
+      this->create_publisher<metrics_statistics_msgs::msg::MetricsMessage>("topic_statistics", rclcpp::QoS(10));
     // TODO do this per node, not per subscription, node owns this
 
 
     auto sub_topic_stats = std::make_shared<
       rclcpp::topic_statistics::SubcriberTopicStatistics<CallbackMessageT>
-      >(publisher);
-
-    sub_topic_stats->PublishMessage();
+      >(this->get_name(), publisher);
 
     //todo (dabonnie): fix hardcoded duration
-    auto timer = this->create_wall_timer(std::chrono::seconds{10}, [this, &sub_topic_stats](){std::cout << "hi\n"; sub_topic_stats->PublishMessage();});
+    auto timer = this->create_wall_timer(std::chrono::seconds{15}, [sub_topic_stats] () {
+      sub_topic_stats->PublishMessage();
+    });
 
     //add the timer to topic stats
     sub_topic_stats->SetTimer(timer);
