@@ -95,6 +95,8 @@ public:
       });
   }
 
+  virtual ~EmptyPublisher() = default;
+
   int get_number_published()
   {
     return number_published_.load();
@@ -109,7 +111,7 @@ private:
   }
 
   rclcpp::Publisher<Empty>::SharedPtr publisher_;
-  std::atomic<int> number_published_{0};
+  std::atomic<size_t> number_published_{0};
   rclcpp::TimerBase::SharedPtr publish_timer_;
 };
 
@@ -137,6 +139,7 @@ public:
       options);
   }
 
+  virtual ~EmptySubscriber() = default;
 private:
   void receive_message(const Empty &) const
   {

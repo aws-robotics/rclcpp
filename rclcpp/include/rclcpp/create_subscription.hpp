@@ -27,6 +27,15 @@
 #include "rclcpp/topic_statistics/subscription_topic_statistics.hpp"
 #include "rmw/qos_profiles.h"
 
+
+#include "rclcpp/node_impl.hpp"
+#include "rclcpp/create_publisher.hpp"
+#include "rclcpp/publisher.hpp"
+#include "rclcpp/timer.hpp"
+#include "rclcpp/detail/resolve_enable_topic_statistics.hpp"
+
+#include "statistics_msgs/msg/metrics_message.hpp"
+
 namespace rclcpp
 {
 
@@ -59,13 +68,32 @@ create_subscription(
   ),
   typename MessageMemoryStrategyT::SharedPtr msg_mem_strat = (
     MessageMemoryStrategyT::create_default()
-  ),
-  std::shared_ptr<rclcpp::topic_statistics::SubscriptionTopicStatistics<CallbackMessageT>>
-  subscription_topic_stats = nullptr
+  )
 )
 {
   using rclcpp::node_interfaces::get_node_topics_interface;
   auto node_topics = get_node_topics_interface(std::forward<NodeT>(node));
+
+  std::shared_ptr<rclcpp::topic_statistics::SubscriptionTopicStatistics<CallbackMessageT>>
+    subscription_topic_stats = nullptr;
+
+  if (rclcpp::detail::resolve_enable_topic_statistics(options, *node.node_base_)) {
+    std::shared_ptr<Publisher<statistics_msgs::msg::MetricsMessage>> publisher =
+      node.create_publisher<statistics_msgs::msg::MetricsMessage>(
+        options.topic_stats_options.publish_topic,
+        qos);
+
+    auto subscription_topic_stats = std::make_shared<
+      rclcpp::topic_statistics::SubscriptionTopicStatistics<CallbackMessageT>
+    >(node.get_name(), publisher);
+
+    auto timer = node.create_wall_timer(
+      options.topic_stats_options.publish_period, [subscription_topic_stats]() {
+        subscription_topic_stats->publish_message();
+      });
+
+    subscription_topic_stats->set_publisher_timer(timer);
+  }
 
   auto factory = rclcpp::create_subscription_factory<MessageT>(
     std::forward<CallbackT>(callback),
