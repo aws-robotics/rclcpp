@@ -12,6 +12,7 @@ find_package(rcpputils REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(rmw REQUIRED)
 find_package(rosgraph_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(rosidl_runtime_cpp REQUIRED)
 find_package(rosidl_typesupport_c REQUIRED)
 find_package(rosidl_typesupport_cpp REQUIRED)
@@ -201,6 +202,7 @@ ament_export_dependencies(rcpputils)
 ament_export_dependencies(rcutils)
 ament_export_dependencies(builtin_interfaces)
 ament_export_dependencies(rosgraph_msgs)
+ament_export_dependencies(rosidl_default_runtime)
 ament_export_dependencies(rosidl_typesupport_cpp)
 ament_export_dependencies(rosidl_typesupport_c)
 ament_export_dependencies(rosidl_runtime_cpp)
@@ -215,7 +217,6 @@ if(BUILD_TESTING)
 
   find_package(rmw_implementation_cmake REQUIRED)
 
-  find_package(sensor_msgs REQUIRED)
   find_package(test_msgs REQUIRED)
 
   include(cmake/rclcpp_add_build_failure_test.cmake)
@@ -612,13 +613,11 @@ if(BUILD_TESTING)
   if(TARGET test_subscription_topic_statistics)
     ament_target_dependencies(test_subscription_topic_statistics
       "libstatistics_collector"
-      "rcl"
       "rcl_interfaces"
       "rcutils"
       "rmw"
       "rosidl_runtime_cpp"
       "rosidl_typesupport_cpp"
-      "sensor_msgs"
       "statistics_msgs"
       "test_msgs")
     target_link_libraries(test_subscription_topic_statistics ${PROJECT_NAME})
@@ -629,6 +628,14 @@ if(BUILD_TESTING)
     ament_target_dependencies(test_subscription_options "rcl")
     target_link_libraries(test_subscription_options ${PROJECT_NAME})
   endif()
+
+  rosidl_generate_interfaces(rclcpp_test_msgs
+    "test/msg/DummyMessage.msg"
+    "test/msg/Header.msg"
+    DEPENDENCIES "builtin_interfaces")
+
+  # To enable use of dummy_message.hpp in test_subscription_topic_statistics.cpp
+  rosidl_target_interfaces(test_subscription_topic_statistics rclcpp_test_msgs "rosidl_typesupport_cpp")
 
   # Install test resources
   install(
